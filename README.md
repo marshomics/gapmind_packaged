@@ -2,16 +2,22 @@
 
 A conda-based, scripted version of the GapMind install from
 [`gaps/SETUP`](https://github.com/morgannprice/PaperBLAST/blob/master/gaps/SETUP).
-The full from-scratch build (all three phases) is wired end to end.
+It takes you from nothing to "analyze a proteome for amino-acid biosynthesis and
+carbon catabolism pathways" with one environment file and four scripts. The full
+from-scratch build (all three phases) is wired end to end.
 
 ## What this replaces
 
-Almost all installation steps are incorporated into one `environment.yml`.
+The original SETUP asks you to compile HMMer from source, fetch the usearch
+binary by hand, download legacy NCBI BLAST off an FTP server, install a pile of
+Perl modules, and drop each executable into a specific `bin/` folder. Almost all
+of that becomes one `environment.yml`.
 
-GapMind's Perl scripts call their tools by hardcoded path:
+The trick is that GapMind's Perl scripts call their tools by hardcoded path:
 `bin/hmmfetch`, `bin/blast/formatdb`, `bin/usearch`, and so on. So after conda
 installs the tools, `setup_code.sh` symlinks each one into the exact path the
-scripts expect.
+scripts expect. That glue is what lets a conda env stand in for the manual
+binary drops.
 
 Three dependencies can't come from conda, and the scripts force all three, so the
 pipeline fetches them automatically:
@@ -24,7 +30,10 @@ pipeline fetches them automatically:
 - **Swissknife** (`SWISS::Entry`), the Perl parser the Swiss-Prot steps use, which
   the code expects unpacked at `SWISS/lib/`.
 
-Phase 3 (the actual genome analysis) defaults to **diamond**.
+Phase 3 (the actual genome analysis) defaults to **diamond**, which is free,
+installs from conda, and the GapMind author reports gives very similar results to
+usearch.
+
 ## Requirements
 
 A working `conda` (or `mamba`) and an internet connection. Designed for Linux

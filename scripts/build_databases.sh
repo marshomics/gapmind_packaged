@@ -27,13 +27,9 @@ for f in litsearch.db uniq.faa; do
     curl -fSL "$PAPERBLAST_DATA_BASE/$f" -o "data/$f"
   fi
 done
-
-# curatedFaa.pl pulls sequences out of uniq.faa with fastacmd, so it must be a
-# formatted BLAST database with parsed seq-ids (-o T).
-if [ ! -e data/uniq.faa.phr ] && [ ! -e data/uniq.faa.00.phr ]; then
-  echo ">> formatdb data/uniq.faa"
-  bin/blast/formatdb -p T -o T -i data/uniq.faa
-fi
+# GapMind's curatedFaa.pl reads uniq.faa as a plain FASTA (not via fastacmd), so
+# it does not need to be formatted with formatdb. The PaperBLAST/SitesBLAST web
+# CGIs would need that, but this pipeline targets the GapMind command line.
 
 if [ ! -s ind/uniprot_sprot.dat.gz ]; then
   echo ">> Downloading Swiss-Prot"

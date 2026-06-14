@@ -27,6 +27,9 @@ while getopts "f:n:s:t:h" opt; do
 done
 [ -n "$FAA" ] && [ -n "$NAME" ] || usage
 [ -s "$FAA" ] || { echo "ERROR: no such FASTA: $FAA" >&2; exit 1; }
+case "$NAME" in
+  *[!A-Za-z0-9_.-]*) echo "ERROR: NAME may contain only letters, digits, '_', '.', '-'" >&2; exit 1 ;;
+esac
 
 # Absolutize the FASTA path before we cd into the code base.
 FAA="$(cd "$(dirname "$FAA")" && pwd)/$(basename "$FAA")"
@@ -35,9 +38,17 @@ cd "$CODE_DIR"
 out="tmp/$NAME"
 mkdir -p "$out"
 
-# Convert the single proteome into the orgs table GapMind expects.
+# buildorgs.pl splits the org specifier on ":" and rejects whitespace in the file
+# path, so hand it a clean, space-free relative path via a symlink.
+ln -sf "$FAA" "$out/input.faa"
 echo ">> buildorgs ($NAME)"
-bin/buildorgs.pl -out "$out/orgs" -orgs "file:$FAA:$NAME"
+bin/buildorgs.pl -out "$out/orgs" -orgs "file:$out/input.faa:$NAME"
+
+# gapsearch.pl -diamond requires <orgprefix>.faa.dmnd, which is set-independent,
+# so build it once here rather than per set.
+if [ "$SEARCH_TOOL" != "usearch" ]; then
+  bin/diamond makedb --quiet --in "$out/orgs.faa" -d "$out/orgs.faa.dmnd"
+fi
 
 for set in $RUN_SETS; do
   echo "=================================================================="
@@ -49,29 +60,26 @@ for set in $RUN_SETS; do
     bin/gaprevsearch.pl -orgs "$out/orgs" -hits "$out/$set.hits" \
         -curated "tmp/path.$set/curated.faa.udb" -out "$out/$set.revhits" -nCPU "$T"
   else
-    bin/diamond makedb --quiet --in "$out/orgs.faa" -d "$out/orgs.$set.dmnd"
     bin/gapsearch.pl    -diamond -orgs "$out/orgs" -set "$set" -out "$out/$set.hits" -nCPU "$T"
     bin/gaprevsearch.pl -diamond -orgs "$out/orgs" -hits "$out/$set.hits" \
         -curated "tmp/path.$set/curated.faa.dmnd" -out "$out/$set.revhits" -nCPU "$T"
   fi
 
   bin/gapsummary.pl -orgs "$out/orgs" -set "$set" \
-      -hits "$out/$set.hits" -rev "$out/$set.revhits" -out "$out/$set.sum"
+      -hits "$out/$set.hits" -revhits "$out/$set.revhits" -out "$out/$set.sum"
 
-  # Assemble the buildGapsDb command, appending optional pieces only when present
-  # (length-guarded array expansion is portable back to bash 3.2 under `set -u`).
+  # Dependency check between pathways. buildGapsDb.pl requires -requirements, so
+  # this step is mandatory; it still writes a header-only file when a set has no
+  # requirements, which buildGapsDb reads happily.
+  bin/checkGapRequirements.pl -org "$NAME" -set "$set" -out "$out/$set.sum.warn"
+
   cmd=(bin/buildGapsDb.pl -gaps "$out/$set.sum"
+       -requirements "$out/$set.sum.warn"
        -steps "tmp/path.$set/steps.db" -out "$out/$set.sum.db")
-
-  # Optional dependency check between pathways.
-  if bin/checkGapRequirements.pl -org "$NAME" -set "$set" -out "$out/$set.sum.warn"; then
-    cmd+=(-requirements "$out/$set.sum.warn")
-  else
-    echo "   note: checkGapRequirements failed; continuing without it"
-  fi
 
   # Optional comparison to organisms with known gaps (amino-acid set only, and
   # only if the marker file was produced when the steps DB was built).
+  # orgsVsMarkers.pl uses usearch regardless of $SEARCH_TOOL.
   if [ "$set" = "aa" ] && [ -s gaps/aa/aa.known.gaps.markers.faa ]; then
     if bin/orgsVsMarkers.pl -orgs "$out/orgs" \
          -vs gaps/aa/aa.known.gaps.markers.faa -out "$out/$set.sum.knownsim"; then
