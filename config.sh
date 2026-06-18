@@ -9,6 +9,13 @@ PIPELINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # All databases are built in-tree under $CODE_DIR/tmp.
 CODE_DIR="${CODE_DIR:-$PIPELINE_DIR/PaperBLAST}"
 
+# Swissknife (SWISS::Entry etc.) is installed under $CODE_DIR/SWISS/lib, which is
+# the directory that contains the SWISS/ package. Putting it on PERL5LIB makes it
+# importable by every perl process here -- including the helper scripts that
+# setupGaps.pl spawns internally -- no matter what each script's own `use lib`
+# line says. Swissknife is pure perl, so this is safe across perl versions.
+export PERL5LIB="$CODE_DIR/SWISS/lib${PERL5LIB:+:$PERL5LIB}"
+
 # Git source for the code base.
 PAPERBLAST_REPO="${PAPERBLAST_REPO:-https://github.com/morgannprice/PaperBLAST.git}"
 PAPERBLAST_REF="${PAPERBLAST_REF:-master}"
@@ -23,6 +30,16 @@ SETS="${SETS:-aa carbon}"
 # hardcodes it; this setting only controls which tool Phase 3 uses.
 SEARCH_TOOL="${SEARCH_TOOL:-diamond}"
 
+# How to obtain the per-set curated + steps databases:
+#   prebuilt -- download the maintainer's consistent curated.faa/curated.db/steps.db
+#               (reliable, matches the official/validated GapMind, fast). Default.
+#   build    -- rebuild them from scratch (Phases 1-2). Faithful to the sources,
+#               but the pathway step files reference curated IDs from an older data
+#               snapshot, so a current-data rebuild can fail on drifted UniProt/
+#               BRENDA identifiers. Only the curated DB is rebuilt; PaperBLAST
+#               itself is never rebuilt.
+DB_SOURCE="${DB_SOURCE:-prebuilt}"
+
 # CPU threads for searches and HMM steps.
 THREADS="${THREADS:-4}"
 
@@ -33,8 +50,12 @@ CONDA_ENV="${CONDA_ENV:-gapmind}"
 # External data sources. Override these if a mirror or release changes.
 # ---------------------------------------------------------------------------
 
-# PaperBLAST curated-literature database (Phase 1 reads litsearch.db + uniq.faa).
-# ~1.5 GB total. GapMind does not rebuild PaperBLAST itself; it consumes this.
+# Prebuilt per-set databases (DB_SOURCE=prebuilt). Files fetched per set:
+#   $PREBUILT_BASE/path.<set>/{curated.faa,curated.db,steps.db}
+PREBUILT_BASE="${PREBUILT_BASE:-https://papers.genomics.lbl.gov/tmp}"
+
+# PaperBLAST curated-literature database (DB_SOURCE=build, Phase 1 reads
+# litsearch.db + uniq.faa). ~1.5 GB total. GapMind never rebuilds PaperBLAST.
 PAPERBLAST_DATA_BASE="${PAPERBLAST_DATA_BASE:-http://papers.genomics.lbl.gov/data}"
 
 # Swiss-Prot flat file (Phase 1: curated2 sequences + heteromer detection).

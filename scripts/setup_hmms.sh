@@ -8,6 +8,14 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=/dev/null
 source "$here/config.sh"
 
+# In prebuilt mode the HMM databases aren't needed: the downloaded steps.db
+# already carries its HMM models (extractHmms.pl pulls them out), and the
+# Phase 1/2 steps that read hmm/Pfam-A.hmm and TIGRFAMs.hmm never run.
+if [ "$DB_SOURCE" = "prebuilt" ]; then
+  echo ">> DB_SOURCE=prebuilt: HMM databases not needed; skipping setup_hmms."
+  exit 0
+fi
+
 cd "$CODE_DIR/hmm"
 
 # --- Pfam-A ----------------------------------------------------------------
