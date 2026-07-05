@@ -71,6 +71,16 @@ echo ">> Merged tables in $BATCH_DIR/merged/"
 echo "   Start with $BATCH_DIR/merged/<set>.sum.rules (one row per genome x pathway;"
 echo "   nHi/nMed/nLo columns), labelled by your manifest name."
 
+# Genome x pathway presence/absence + confidence matrices (needs numpy).
+if [ -s "$orgs_out" ] && python -c 'import numpy' >/dev/null 2>&1; then
+  echo ">> building presence/absence matrices (mode=$PA_MODE)"
+  python "$here/scripts/presence_absence.py" --tables "$BATCH_DIR/merged" --orgs "$orgs_out" \
+      --sets "$SETS" --code-dir "$CODE_DIR" --mode "$PA_MODE" --out "$BATCH_DIR/merged" \
+    || echo "   note: presence step failed; rerun with 'make presence'"
+else
+  echo ">> skipping presence matrices (numpy not in env yet); run 'make env' then 'make presence'"
+fi
+
 # Summary / QC / biological figures (best-effort; needs matplotlib in the env).
 if [ -s "$orgs_out" ] && python -c 'import matplotlib' >/dev/null 2>&1; then
   echo ">> generating plots"

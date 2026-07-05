@@ -95,6 +95,13 @@ BATCH_SIZE="${BATCH_SIZE:-500}"
 # largest output at scale; set to 0 to keep only rules + steps.
 KEEP_CAND="${KEEP_CAND:-1}"
 
+# Presence/absence thresholding for the genome x pathway 0/1 matrices:
+#   probably (default) -- present iff nLo==0 (every step at least medium conf.);
+#                         this is GapMind's own "probably present" call.
+#   strict             -- present iff nMed==0 and nLo==0 (every step high conf.).
+# A companion 2/1/0 confidence matrix is always written so you can re-threshold.
+PA_MODE="${PA_MODE:-probably}"
+
 # ---- SGE submission (tuned for this cluster from qhost / qstat -g c / qconf) ----
 # Observed: standard.q has 865 schedulable slots, idle, 24h walltime cap (s_rt
 # 23:55:00, h_rt 24:00:00); PE "parallel" has allocation_rule $pe_slots, so a
@@ -112,7 +119,9 @@ SGE_TC="${SGE_TC:-100}"
 # Queue(s). standard.q is idle and allows 24h. Use "standard.q,long.q" to also pull
 # long.q's free slots (also 24h); leave empty to let SGE pick any queue you can use.
 SGE_QUEUE="${SGE_QUEUE:-standard.q}"
-# Per-task limits. RAM is abundant (500 GB - 2 TB per node) so 16G is safe headroom;
-# 12h is well under the 24h cap. Confirm both from `make batch-calibrate`.
-SGE_H_VMEM="${SGE_H_VMEM:-16G}"
+# Per-task limits, set from a calibration run: a 500-genome/8-core batch peaked at
+# ~15 GB and ~44 min. 24 GB gives headroom for heavier batches (RAM is abundant,
+# 500 GB - 2 TB per node, and cores bind before memory); 12h sits far above the
+# ~44-min actual and under the queue's 24h cap.
+SGE_H_VMEM="${SGE_H_VMEM:-24G}"
 SGE_H_RT="${SGE_H_RT:-12:00:00}"

@@ -14,7 +14,7 @@ THREADS ?=
 MANIFEST ?=
 
 .PHONY: help env setup setup-code setup-hmms databases all analyze check clean distclean \
-        batch-prepare batch-calibrate batch-submit batch-status batch-merge plots
+        batch-prepare batch-calibrate batch-submit batch-status batch-merge plots presence
 
 help:
 	@echo "GapMind end-to-end pipeline"
@@ -34,6 +34,7 @@ help:
 	@echo "  make batch-status                         progress (qstat + completed count)"
 	@echo "  make batch-merge                          combine finished batches (auto-run by the merge job)"
 	@echo "  make plots                                summary/QC/biological figures (PNG+SVG) from merged output"
+	@echo "  make presence [PA_MODE=probably|strict]   genome x pathway 0/1 presence + 2/1/0 confidence matrices"
 	@echo
 	@echo "Typical run:  make env && conda activate $(ENV) && make all"
 	@echo "Then:         make analyze FAA=my_proteins.faa NAME=myorg"
@@ -84,6 +85,9 @@ batch-merge:
 
 plots:
 	CONDA_ENV=$(ENV) $(RUN) bash scripts/plots.sh
+
+presence:
+	CONDA_ENV=$(ENV) $(RUN) bash scripts/presence.sh
 
 check:
 	@for s in scripts/*.sh; do echo "bash -n $$s"; bash -n "$$s"; done; echo "OK"
