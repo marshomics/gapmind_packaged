@@ -32,6 +32,11 @@ dependencies:
   - perl-cgi                    # CGI          (FetchAssembly.pm)
   - perl-uri                    # URI::Escape  (FetchAssembly.pm)
 
+  # plotting (scripts/make_plots.py — summary / QC / biological figures)
+  - matplotlib-base >=3.5
+  - numpy
+  - scipy
+
   # download / build helpers
   - make
   - git

@@ -72,3 +72,47 @@ SWISSKNIFE_URL="${SWISSKNIFE_URL:-https://sourceforge.net/projects/swissknife/fi
 
 # usearch 11 public-domain mirror (the OS-specific file is chosen in setup_code.sh).
 USEARCH_BASE="${USEARCH_BASE:-https://raw.githubusercontent.com/rcedgar/usearch_old_binaries/main/bin}"
+
+# ---------------------------------------------------------------------------
+# Large-scale batch analysis on an SGE cluster (scripts/batch_*.sh)
+# ---------------------------------------------------------------------------
+
+# Tab-separated manifest of genomes to analyze. Header line required; must have a
+# column named "faa" (path to a protein FASTA). Optional column "name" (a unique
+# organism id); if absent, a sanitized name is derived from the file's basename.
+MANIFEST="${MANIFEST:-}"
+
+# Working + output tree for batch runs (put this on scratch with plenty of space).
+BATCH_DIR="${BATCH_DIR:-$PIPELINE_DIR/batch}"
+
+# Genomes per batch = per SGE array task. Larger = fewer tasks and better amortized
+# startup; smaller = shorter tasks, finer parallelism, cheaper retries. 500 suits
+# this cluster's 24h walltime and 8-core tasks; confirm with `make batch-calibrate`
+# (340,000 genomes / 500 = 680 tasks).
+BATCH_SIZE="${BATCH_SIZE:-500}"
+
+# Keep the per-candidate table (*.sum.cand) in the merged output. It is by far the
+# largest output at scale; set to 0 to keep only rules + steps.
+KEEP_CAND="${KEEP_CAND:-1}"
+
+# ---- SGE submission (tuned for this cluster from qhost / qstat -g c / qconf) ----
+# Observed: standard.q has 865 schedulable slots, idle, 24h walltime cap (s_rt
+# 23:55:00, h_rt 24:00:00); PE "parallel" has allocation_rule $pe_slots, so a
+# task's slots all land on ONE node (what GapMind's threading needs); no per-user
+# slot quota. Everything a task reads/writes (CODE_DIR, BATCH_DIR, the conda env,
+# the genome FASTAs) must be on shared storage visible from every compute node.
+
+# CPU cores per task, all on one node (passed to gapsearch/gaprevsearch -nCPU).
+SGE_SLOTS="${SGE_SLOTS:-8}"
+# Parallel environment (used because SGE_SLOTS > 1). "parallel" is $pe_slots here.
+SGE_PE="${SGE_PE:-parallel}"
+# Concurrent array tasks: 100 x 8 = 800 of standard.q's 865 slots. Raise toward 108
+# to use all of standard.q; or widen SGE_QUEUE (below) to also use long.q.
+SGE_TC="${SGE_TC:-100}"
+# Queue(s). standard.q is idle and allows 24h. Use "standard.q,long.q" to also pull
+# long.q's free slots (also 24h); leave empty to let SGE pick any queue you can use.
+SGE_QUEUE="${SGE_QUEUE:-standard.q}"
+# Per-task limits. RAM is abundant (500 GB - 2 TB per node) so 16G is safe headroom;
+# 12h is well under the 24h cap. Confirm both from `make batch-calibrate`.
+SGE_H_VMEM="${SGE_H_VMEM:-16G}"
+SGE_H_RT="${SGE_H_RT:-12:00:00}"
