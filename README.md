@@ -28,10 +28,6 @@ software and the third-party tools. If you use either pipeline, cite the GapMind
 papers (Price et al., mSystems 2020 and PLOS Genetics 2022), listed in
 [`CITATION.cff`](CITATION.cff).
 
-Before publishing, fill the placeholders (author surname, affiliation, ORCID, and the
-repository URL/owner) in `CITATION.cff`, `.zenodo.json`, `NOTICE`, and the `$id` in
-`nextflow/nextflow_schema.json`.
-
 ## Continuous integration
 
 `.github/workflows/ci.yml` runs on every push and pull request: a Nextflow stub run
