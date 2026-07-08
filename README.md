@@ -27,15 +27,3 @@ pipelines wrap rather than re-implement. [`NOTICE`](NOTICE) attributes the wrapp
 software and the third-party tools. If you use either pipeline, cite the GapMind
 papers (Price et al., mSystems 2020 and PLOS Genetics 2022), listed in
 [`CITATION.cff`](CITATION.cff).
-
-## Continuous integration
-
-`.github/workflows/ci.yml` runs on every push and pull request: a Nextflow stub run
-(validates the workflow DAG with no container or data) plus linting of the shell and
-Python scripts in both pipelines.
-
-## Not part of the pipelines
-
-`metabolism/` is separate reference data (~61 MB) that neither pipeline reads. It's
-gitignored by default so it doesn't bloat the repository; delete the `metabolism/`
-line in `.gitignore` if you do want it tracked.
