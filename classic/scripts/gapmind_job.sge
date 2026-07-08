@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# SGE job wrapper for GapMind batch analysis. Submitted by batch_submit.sh.
+# As an array task (SGE_TASK_ID set) it runs one batch; as a plain job
+# (SGE_TASK_ID unset/"undefined", used for the held merge job) it merges.
+# Resource/array options (-t, -tc, -pe, -l, -o, -N) are set on the qsub command
+# line, not here, so the same script serves both jobs.
+#$ -S /bin/bash
+#$ -j y
+#$ -cwd
+set -euo pipefail
+
+: "${CONDA_BASE:?CONDA_BASE not passed}"
+: "${CONDA_ENV:?CONDA_ENV not passed}"
+: "${PIPELINE_DIR:?PIPELINE_DIR not passed}"
+
+# Activate the conda env non-interactively.
+# shellcheck source=/dev/null
+source "$CONDA_BASE/etc/profile.d/conda.sh"
+conda activate "$CONDA_ENV"
+
+if [ "${SGE_TASK_ID:-undefined}" = "undefined" ]; then
+  exec bash "$PIPELINE_DIR/scripts/batch_merge.sh"
+else
+  exec bash "$PIPELINE_DIR/scripts/batch_run.sh" "$SGE_TASK_ID"
+fi

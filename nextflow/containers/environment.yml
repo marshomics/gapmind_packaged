@@ -1,0 +1,32 @@
+# Conda environment baked into the GapMind container image.
+# Slim, pinned, and scoped to the PREBUILT analysis path (Phase 3): no
+# Swissknife, Pfam, or legacy BLAST are needed because the curated + steps
+# databases are downloaded ready-made. Pin versions for reproducibility.
+name: base
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - perl=5.32
+  # Perl modules the analysis scripts import
+  - perl-dbi
+  - perl-dbd-sqlite
+  - perl-bioperl
+  - perl-libwww-perl
+  - perl-lwp-protocol-https
+  - perl-json
+  - perl-xml-libxml
+  - perl-cgi
+  - perl-uri
+  # sequence search + profile HMM
+  - hmmer=3.3.2
+  - diamond=2.1.9
+  - sqlite
+  # plotting + presence matrices
+  - numpy=1.26
+  - matplotlib-base=3.8
+  - scipy=1.11
+  # helpers used during image build / at runtime
+  - curl
+  - procps-ng

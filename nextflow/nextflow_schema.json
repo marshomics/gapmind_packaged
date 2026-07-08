@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/TODO-owner/gapmind/main/nextflow/nextflow_schema.json",
+  "title": "gapmind-nf pipeline parameters",
+  "description": "Portable, containerized GapMind analysis (amino-acid biosynthesis + carbon catabolism).",
+  "type": "object",
+  "definitions": {
+    "input_output": {
+      "title": "Input/output",
+      "type": "object",
+      "required": ["input", "outdir"],
+      "properties": {
+        "input": {
+          "type": "string",
+          "format": "file-path",
+          "mimetype": "text/csv",
+          "pattern": "^\\S+\\.csv$",
+          "description": "Samplesheet CSV with a header and columns 'faa' (path to a protein FASTA) and optional 'sample' (a unique name)."
+        },
+        "outdir": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "Output directory (merged tables, presence matrices, plots, pipeline_info)."
+        }
+      }
+    },
+    "analysis": {
+      "title": "Analysis",
+      "type": "object",
+      "properties": {
+        "sets": {
+          "type": "string",
+          "default": "aa carbon",
+          "description": "Space-separated pathway sets to run ('aa', 'carbon', or both)."
+        },
+        "batch_size": {
+          "type": "integer",
+          "default": 500,
+          "minimum": 1,
+          "description": "Genomes per task. Larger amortizes startup; affects speed, not the calls."
+        },
+        "search_tool": {
+          "type": "string",
+          "default": "diamond",
+          "enum": ["diamond", "usearch"],
+          "description": "Similarity search tool used in the analysis."
+        },
+        "knownsim": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run the amino-acid known-gap comparison (orgsVsMarkers; requires usearch)."
+        },
+        "pa_mode": {
+          "type": "string",
+          "default": "probably",
+          "enum": ["probably", "strict"],
+          "description": "Presence/absence threshold: 'probably' (nLo==0) or 'strict' (nMed==0 and nLo==0)."
+        },
+        "keep_cand": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep the large per-candidate table (*.sum.cand) in the merged output."
+        }
+      }
+    },
+    "databases": {
+      "title": "Databases",
+      "type": "object",
+      "properties": {
+        "db_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "Reuse an existing database directory (with path.<set>/) instead of downloading."
+        },
+        "prebuilt_base": {
+          "type": "string",
+          "default": "https://papers.genomics.lbl.gov/tmp",
+          "description": "Base URL for the prebuilt curated + steps databases."
+        }
+      }
+    },
+    "containers": {
+      "title": "Containers",
+      "type": "object",
+      "properties": {
+        "container": {
+          "type": "string",
+          "default": "gapmind:latest",
+          "description": "Docker image tag (-profile docker)."
+        },
+        "singularity_image": {
+          "type": "string",
+          "description": "Path to the Singularity/Apptainer .sif image (-profile singularity/apptainer)."
+        }
+      }
+    }
+  },
+  "allOf": [
+    { "$ref": "#/definitions/input_output" },
+    { "$ref": "#/definitions/analysis" },
+    { "$ref": "#/definitions/databases" },
+    { "$ref": "#/definitions/containers" }
+  ]
+}

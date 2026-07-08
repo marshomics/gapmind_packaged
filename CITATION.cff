@@ -1,0 +1,91 @@
+cff-version: 1.2.0
+message: >-
+  If you use either pipeline, please cite it together with the GapMind papers and
+  PaperBLAST listed under references (these pipelines run their software).
+title: "GapMind analysis pipelines: command-line (conda/SGE) and Nextflow implementations"
+abstract: >-
+  Two implementations of the GapMind amino-acid biosynthesis and carbon-catabolism
+  analysis that run the original PaperBLAST/GapMind programs at scale: a conda + Make
+  command-line pipeline with SGE batch support, and a containerized Nextflow workflow
+  portable across local, SGE, and SLURM. Both produce per-genome pathway calls, merged
+  tables, presence/absence matrices, and figures.
+type: software
+authors:
+  - given-names: James
+    family-names: "TODO-Surname"          # TODO: fill in
+    affiliation: "TODO-Institution"        # TODO
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # TODO
+version: 1.0.0
+date-released: "2026-07-07"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/TODO-owner/gapmind"   # TODO
+keywords:
+  - GapMind
+  - metabolism
+  - pathway annotation
+  - amino acid biosynthesis
+  - carbon catabolism
+  - Nextflow
+  - bioinformatics
+references:
+  - type: article
+    title: "GapMind: Automated Annotation of Amino Acid Biosynthesis"
+    authors:
+      - family-names: Price
+        given-names: "Morgan N."
+      - family-names: Deutschbauer
+        given-names: "Adam M."
+      - family-names: Arkin
+        given-names: "Adam P."
+    journal: mSystems
+    year: 2020
+    doi: 10.1128/mSystems.00291-20
+  - type: article
+    title: "Filling gaps in bacterial catabolic pathways with computation and high-throughput genetics"
+    authors:
+      - family-names: Price
+        given-names: "Morgan N."
+      - family-names: Deutschbauer
+        given-names: "Adam M."
+      - family-names: Arkin
+        given-names: "Adam P."
+    journal: "PLOS Genetics"
+    year: 2022
+    doi: 10.1371/journal.pgen.1010156
+  - type: software
+    title: "PaperBLAST / GapMind"
+    authors:
+      - family-names: Price
+        given-names: "Morgan N."
+    repository-code: "https://github.com/morgannprice/PaperBLAST"
+    license: GPL-3.0
+  - type: article
+    title: "Sensitive protein alignments at tree-of-life scale using DIAMOND"
+    authors:
+      - family-names: Buchfink
+        given-names: Benjamin
+      - family-names: Reuter
+        given-names: Klaus
+      - family-names: Drost
+        given-names: "Hajk-Georg"
+    journal: "Nature Methods"
+    year: 2021
+    doi: 10.1038/s41592-021-01101-x
+  - type: article
+    title: "Nextflow enables reproducible computational workflows"
+    authors:
+      - family-names: "Di Tommaso"
+        given-names: Paolo
+      - family-names: Chatzou
+        given-names: Maria
+      - family-names: Floden
+        given-names: "Evan W."
+      - family-names: "Barja"
+        given-names: "Pablo Prieto"
+      - family-names: Palumbo
+        given-names: Emilio
+      - family-names: Notredame
+        given-names: Cedric
+    journal: "Nature Biotechnology"
+    year: 2017
+    doi: 10.1038/nbt.3820

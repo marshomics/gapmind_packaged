@@ -1,0 +1,50 @@
+gapmind-nf — a portable, containerized Nextflow workflow for GapMind analysis
+Copyright (C) 2026  <Author Name, affiliation>   # TODO: fill in
+Licensed under the GNU General Public License v3.0 (see LICENSE).
+
+This workflow does not re-implement GapMind. It orchestrates and containerizes
+the original PaperBLAST/GapMind programs, which do the science. Please cite the
+GapMind papers (see CITATION.cff) in any publication that uses this workflow.
+
+--------------------------------------------------------------------------------
+Wrapped software
+--------------------------------------------------------------------------------
+PaperBLAST / GapMind — Morgan N. Price, Arkin lab, Lawrence Berkeley National
+  Laboratory. GPL-3.0. https://github.com/morgannprice/PaperBLAST
+  The container clones this at a pinned commit and runs its scripts unmodified
+  except for shebang/interpreter normalization and tool path wiring (which do not
+  change results). Corresponding source for the container is that upstream
+  repository plus this repository (containers/).
+
+--------------------------------------------------------------------------------
+Third-party tools in the container (each under its own license)
+--------------------------------------------------------------------------------
+- DIAMOND        GPL-3.0            https://github.com/bbuchfink/diamond
+- HMMER          BSD-3-Clause       http://hmmer.org
+- Nextflow       Apache-2.0         https://www.nextflow.io
+- Singularity/Apptainer, Docker     BSD-3 / Apache-2.0 (runtime, not bundled)
+- Perl + CPAN modules (DBI, DBD::SQLite, BioPerl, LWP, XML::LibXML, CGI, ...)
+                 Artistic/GPL (Perl) and each module's license
+- NumPy, SciPy, Matplotlib          BSD-3 / PSF-style
+- usearch 11 (optional; only for the amino-acid known-gap step)
+    The binary is taken from the public-domain mirror at
+    https://github.com/rcedgar/usearch_old_binaries . CONFIRM its redistribution
+    terms before shipping a public image, or build without it and run with
+    --knownsim false (also required for an ARM-only image).
+
+--------------------------------------------------------------------------------
+Databases (downloaded at run time, not redistributed here)
+--------------------------------------------------------------------------------
+The prebuilt curated + steps databases are fetched from
+papers.genomics.lbl.gov at run time. They are derived from the PaperBLAST
+characterized set and public sources (Swiss-Prot, BRENDA, TIGRFam, Pfam, EcoCyc,
+CharProtDB, and others). If you archive a specific database snapshot for
+reproducibility, confirm the redistribution terms of LBL and of those sources.
+
+--------------------------------------------------------------------------------
+Note
+--------------------------------------------------------------------------------
+This NOTICE is a good-faith summary, not legal advice. Before publishing or
+redistributing (especially the container image), confirm license compatibility
+with your institution and, as a courtesy and for scientific credit, contact the
+PaperBLAST/GapMind author.
